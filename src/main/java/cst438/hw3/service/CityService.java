@@ -1,12 +1,13 @@
 package cst438.hw3.service;
 
-//import java.util.Date; // No longer needed
 import cst438.hw3.domain.City;
 import cst438.hw3.domain.CityInfo;
 import cst438.hw3.domain.CityRepository;
 import cst438.hw3.domain.CountryRepository;
 import cst438.hw3.domain.TempAndTime;
 import java.util.List;
+import org.springframework.amqp.core.FanoutExchange;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,10 @@ public class CityService {
   private CountryRepository countryRepository;
   @Autowired
   private WeatherService weatherService;
+  @Autowired
+  private RabbitTemplate rabbitTemplate;
+  @Autowired
+  private FanoutExchange fanout;
 
   public CityInfo getCityInfo(String cityName) {
     List<City> cities = cityRepository.findByName(cityName);
@@ -32,17 +37,15 @@ public class CityService {
       String country = countryRepository.findByCode(city.getCountryCode()).getName();
       TempAndTime tempAndTime = weatherService.getTempAndTime(cityName);
 
-      // Moved Date and Temp conversions to TempAndTime to allow easier testing
-      //double temp = tempAndTime.temp;
-      //double tempF = Math.round((temp - 273.15) * 9.0 / 5.0 + 32.0);
-      //Date date = new Date((tempAndTime.time) * 1000);
-      //String time = date.toString();
-
       // return a CityInfo object but call ConvertTempToFahrenheit and convertTimeToString to
       // get correct formats for temp and time
       return new CityInfo(city, country, tempAndTime.ConvertTempToFahrenheit(), tempAndTime.convertTimeToString());
     }
+  }
 
-
+  public void requestReservation(String cityName, String level, String email) {
+    String msg = "{\"cityName\": \"" + cityName + "\" \"level\": \"" + level + "\" \"email\": \"" +email+ "\"}";
+        System.out.println("Sending message: " + msg);
+        rabbitTemplate.convertAndSend(fanout.getName(), "", msg);
   }
 }

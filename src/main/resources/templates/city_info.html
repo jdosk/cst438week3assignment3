@@ -12,5 +12,14 @@ Country: <span th:inline="text"> [[${cityInfo.countryName}]] </span> <br/>
 Population: <span th:inline="text"> [[${cityInfo.population}]] </span> <br/>
 Temperature: <span th:inline="text"> [[${cityInfo.temp}]] </span> Fahrenheit <br/>
 Time: <span th:inline="text"> [[${cityInfo.time}]] </span> <br/>
+
+<form action="#" th:action="@{/cities/reservation}" method="post">
+  Email: <input type="text" name="email" id="email" /><br/>
+  <input type="radio" name="level" value="Luxury">Luxury $1000 <br/>
+  <input type="radio" name="level" value="Very Good">Very Good $500 <br/>
+  <input type="radio" name="level" value="Good">Good $350 <br/>
+  <input type="hidden" name="city" th:value="${cityInfo.name}">
+  <input type="submit" value="Submit" />
+</form>
 </body>
 </html>
